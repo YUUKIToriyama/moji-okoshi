@@ -19,9 +19,16 @@ const flacToText = async (fileName: string) => {
 			enableAutomaticPunctuation: true
 		}
 	});
-	return response.results.map(result => result.alternatives[0].transcript);
+	return response.results.map(result => {
+		const alternatives = result.alternatives.sort((a, b) => {
+			return (a.confidence < b.confidence) ? 1 : -1;
+		});
+		return alternatives[0].transcript
+	});
 }
 
-flacToText("./data/sample.flac").then(result => {
-	console.log(result);
-});
+for (let i = 1; i <= 149; i++) {
+	flacToText(`./data/${i}.flac`).then(result => {
+		fs.writeFile(`./data/${i}.txt`, result.join("\n").trim());
+	});
+}
